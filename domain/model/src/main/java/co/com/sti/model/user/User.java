@@ -17,10 +17,11 @@ public class User {
     private String name;
     private String lastName;
     private String email;
+    private String password;
     private String numberIdentity;
     private LocalDate birthDate;
     private String phoneNumber;
     private String address;
-    private Long idRole;
+    private Integer idRole;
     private BigDecimal salary;
 }

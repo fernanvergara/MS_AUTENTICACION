@@ -1,6 +1,8 @@
 package co.com.sti.api;
 
 import co.com.sti.api.dto.CreateUserDTO;
+import co.com.sti.api.dto.LoginDto;
+import co.com.sti.usecase.authentication.IAuthenticationUseCase;
 import co.com.sti.usecase.exceptios.InvalidUserDataException;
 import co.com.sti.api.mapper.UserDTOMapper;
 import co.com.sti.usecase.resgisteruser.IRegisterUserUseCase;
@@ -10,6 +12,7 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -26,8 +29,10 @@ import java.util.stream.Collectors;
 public class Handler {
     private final IRegisterUserUseCase registerUserUseCase;
     private final ISearchUserUseCase searchUserUseCase;
+    private final IAuthenticationUseCase authenticationUseCase;
     private final UserDTOMapper userDTOMapper;
     private final Validator validator;
+    private final PasswordEncoder passwordEncoder;
 
     public Mono<ServerResponse> registerUserEntryPoint(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreateUserDTO.class)
@@ -42,6 +47,7 @@ public class Handler {
                     return Mono.just(dto);
                 })
                 .map(userDTOMapper::toModel)
+                .doOnNext(model -> model.setPassword(passwordEncoder.encode(model.getNumberIdentity())))
                 .flatMap(registerUserUseCase::registerUser)
                 .flatMap(savedUser -> {
                         log.info("Usuario registrado correctamente: {}", savedUser);
@@ -72,5 +78,17 @@ public class Handler {
                             return ServerResponse.ok().build();
                         })
                 );
+    }
+
+    public Mono<ServerResponse> login(ServerRequest request) {
+        return request.bodyToMono(LoginDto.class)
+                .flatMap(loginDto -> authenticationUseCase.authenticate(loginDto.getEmail(), loginDto.getPassword())
+                        .doOnSuccess(authResponseDto -> {
+                            log.info("Usuario autenticado: {}", authResponseDto.getEmail());
+                            log.info("Nombres: {}", authResponseDto.getFirstName()+" "+authResponseDto.getLastName());
+                            log.info("Role: {}", authResponseDto.getRole());
+                            log.info("token: {}", authResponseDto.getToken());
+                        })
+                        .flatMap(authResponseDto -> ServerResponse.ok().bodyValue(authResponseDto)));
     }
 }

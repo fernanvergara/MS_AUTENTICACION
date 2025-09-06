@@ -2,6 +2,8 @@ package co.com.sti.api;
 
 import co.com.sti.api.config.TaskPath;
 import co.com.sti.api.dto.CreateUserDTO;
+import co.com.sti.api.dto.LoginDto;
+import co.com.sti.usecase.authentication.dto.AuthResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -71,10 +73,34 @@ public class RouterRest {
                                                     schema = @Schema(implementation = String.class)))
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/login",
+                    beanClass = Handler.class,
+                    beanMethod = "login",
+                    operation = @Operation(
+                            operationId = "login",
+                            summary = "Inicio de sesión",
+                            description = "Autentica al usuario con email y contraseña, y devuelve un token JWT.",
+                            requestBody = @RequestBody(
+                                    required = true,
+                                    description = "Credenciales del usuario",
+                                    content = @Content(schema = @Schema(implementation = LoginDto.class))
+                            ),
+                            responses = {
+                                    @ApiResponse(responseCode = "200", description = "Autenticación exitosa. Retorna el token de seguridad.",
+                                            content = @Content(mediaType = "application/json",
+                                                    schema = @Schema(implementation = AuthResponseDto.class))),
+                                    @ApiResponse(responseCode = "401", description = "Credenciales inválidas",
+                                            content = @Content(mediaType = "application/json",
+                                                    schema = @Schema(example = "{\"error\":\"Credenciales invalidas\"}")))
+                            }
+                    )
             )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler, TaskPath taskPath) {
         return route(POST(taskPath.getTasks()), handler::registerUserEntryPoint)
-                .andRoute(GET(taskPath.getTasksById()), handler::getUserByIdentificationEntryPoint);
+                .andRoute(GET(taskPath.getTasksById()), handler::getUserByIdentificationEntryPoint)
+                .andRoute(POST(taskPath.getTaskAuth()), handler::login);
     }
 }

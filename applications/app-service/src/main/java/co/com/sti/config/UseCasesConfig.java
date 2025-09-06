@@ -1,6 +1,8 @@
 package co.com.sti.config;
 
 import co.com.sti.model.user.gateways.UserRepository;
+import co.com.sti.usecase.authentication.AuthenticationUseCase;
+import co.com.sti.usecase.authentication.jwt.IJwtUtilsAuth;
 import co.com.sti.usecase.resgisteruser.ResgisterUserUseCase;
 import co.com.sti.usecase.searchuser.SearchUserUseCase;
 import co.com.sti.usecase.transaction.TransactionExecutor;
@@ -26,4 +28,10 @@ public class UseCasesConfig {
     public ResgisterUserUseCase resgisterUserUseCase(UserRepository userRepository, TransactionExecutor transactionExecutor) {
         return new ResgisterUserUseCase(userRepository,  transactionExecutor);
     }
+
+    @Bean
+    public AuthenticationUseCase authenticationUseCase(UserRepository userRepository, IJwtUtilsAuth tokenAndPassword) {
+        return new AuthenticationUseCase(userRepository, tokenAndPassword);
+    }
+
 }

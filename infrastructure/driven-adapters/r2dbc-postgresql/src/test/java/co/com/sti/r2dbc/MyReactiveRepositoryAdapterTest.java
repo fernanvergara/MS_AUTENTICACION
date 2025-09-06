@@ -56,7 +56,7 @@ class MyReactiveRepositoryAdapterTest {
         when(mapper.map(any(User.class), eq(UserEntity.class))).thenReturn(testUserEntity);
         when(repository.save(any(UserEntity.class))).thenReturn(Mono.just(testUserEntity));
 
-        Mono<Void> result = adapter.saveUser(testUser);
+        Mono<User> result = adapter.saveUser(testUser);
         StepVerifier.create(result)
                 .verifyComplete();
         verify(repository).save(testUserEntity);

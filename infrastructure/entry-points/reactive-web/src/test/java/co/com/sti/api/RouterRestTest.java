@@ -14,7 +14,6 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +28,7 @@ import reactor.core.publisher.Mono;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest
@@ -57,28 +57,28 @@ class RouterRestTest {
     static class TestRouter {
         @Bean
         IRegisterUserUseCase registerUserUseCase() {
-            return Mockito.mock(IRegisterUserUseCase.class);
+            return mock(IRegisterUserUseCase.class);
         }
 
         @Bean
         ISearchUserUseCase searchUserUseCase() {
-            return Mockito.mock(ISearchUserUseCase.class);
+            return mock(ISearchUserUseCase.class);
         }
 
         @Bean
         UserDTOMapper userDTOMapper() {
-            return Mockito.mock(UserDTOMapper.class);
+            return mock(UserDTOMapper.class);
         }
 
         @Bean
         Validator validator() {
-            return Mockito.mock(Validator.class);
+            return mock(Validator.class);
         }
 
         @Bean
         TaskPath taskPath() {
             // Se configura el mock del TaskPath en el momento de la creación del bean
-            TaskPath taskPathMock = Mockito.mock(TaskPath.class);
+            TaskPath taskPathMock = mock(TaskPath.class);
             when(taskPathMock.getTasks()).thenReturn("/api/v1/usuarios");
             when(taskPathMock.getTasksById()).thenReturn("/api/v1/usuarios/{identification}");
             return taskPathMock;
@@ -123,7 +123,7 @@ class RouterRestTest {
         when(userDTOMapper.toModel(any(CreateUserDTO.class))).thenReturn(new User());
 
         @SuppressWarnings("unchecked")
-        Set<ConstraintViolation<CreateUserDTO>> violations = (Set<ConstraintViolation<CreateUserDTO>>) Mockito.mock(Set.class);
+        Set<ConstraintViolation<CreateUserDTO>> violations = (Set<ConstraintViolation<CreateUserDTO>>) mock(Set.class);
         when(violations.isEmpty()).thenReturn(false);
         when(validator.validate(any(CreateUserDTO.class))).thenReturn(violations);
 
@@ -140,7 +140,7 @@ class RouterRestTest {
     @DisplayName("should return 400 Bad Request for missing required data (e.g., name)")
     void testListenPOST_withMissingData() {
         @SuppressWarnings("unchecked")
-        Set<ConstraintViolation<CreateUserDTO>> violations = (Set<ConstraintViolation<CreateUserDTO>>) Mockito.mock(Set.class);
+        Set<ConstraintViolation<CreateUserDTO>> violations = (Set<ConstraintViolation<CreateUserDTO>>) mock(Set.class);
         when(violations.isEmpty()).thenReturn(false);
         when(validator.validate(any(CreateUserDTO.class))).thenReturn(violations);
 
@@ -178,7 +178,7 @@ class RouterRestTest {
         when(userDTOMapper.toModel(any(CreateUserDTO.class))).thenReturn(new User());
 
         @SuppressWarnings("unchecked")
-        Set<ConstraintViolation<CreateUserDTO>> violations = (Set<ConstraintViolation<CreateUserDTO>>) Mockito.mock(Set.class);
+        Set<ConstraintViolation<CreateUserDTO>> violations = (Set<ConstraintViolation<CreateUserDTO>>) mock(Set.class);
         when(violations.isEmpty()).thenReturn(false);
         when(validator.validate(any(CreateUserDTO.class))).thenReturn(violations);
 

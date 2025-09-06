@@ -23,11 +23,11 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Mono<Void> saveUser(User user) {
+    public Mono<User> saveUser(User user) {
         UserEntity userEntity = mapper.map(user, UserEntity.class);
         return repository.save(userEntity)
                 .doOnNext(u -> log.info("Nuevo usuario registrado con ID:'{}'", u.getId()))
-                .then();
+                .map(savedUser -> mapper.map(savedUser, User.class));
     }
 
     @Override

@@ -25,6 +25,8 @@ class ConfigTest {
 
     @Autowired
     private WebTestClient webTestClient;
+    @Autowired
+    private TaskPath taskPath;
 
     @Configuration
     static class TestConfig {
@@ -65,7 +67,7 @@ class ConfigTest {
     @DisplayName("corsConfigurationShouldAllowOrigins() should return expected headers")
     void corsConfigurationShouldAllowOrigins() {
         webTestClient.post()
-                .uri("/api/v1/usuarios")
+                .uri(taskPath.getTasks())
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Security-Policy",
@@ -82,7 +84,7 @@ class ConfigTest {
     @DisplayName("securityHeadersConfig should return expected headers for GET request")
     void securityHeadersConfigShouldApplyToGetRequest() {
         webTestClient.get()
-                .uri("/api/v1/usuarios/123")
+                .uri(taskPath.getTasksById(),"123456")
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Security-Policy",
