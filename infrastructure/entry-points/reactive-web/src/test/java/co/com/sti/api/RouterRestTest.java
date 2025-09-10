@@ -47,7 +47,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(excludeAutoConfiguration = ReactiveSecurityAutoConfiguration.class)
-// 2. Importamos nuestras configuraciones de prueba y los componentes necesarios.
 @Import({Handler.class, RouterRest.class, GlobalExceptionHandler.class, RouterRestTest.TestRouter.class})
 class RouterRestTest {
 
