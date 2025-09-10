@@ -13,8 +13,7 @@ import org.reactivecommons.utils.ObjectMapper;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,11 +54,15 @@ class MyReactiveRepositoryAdapterTest {
     void testSaveUser() {
         when(mapper.map(any(User.class), eq(UserEntity.class))).thenReturn(testUserEntity);
         when(repository.save(any(UserEntity.class))).thenReturn(Mono.just(testUserEntity));
+        when(mapper.map(any(UserEntity.class), eq(User.class))).thenReturn(testUser);
 
         Mono<User> result = adapter.saveUser(testUser);
         StepVerifier.create(result)
+                .expectNext(testUser)
                 .verifyComplete();
         verify(repository).save(testUserEntity);
+        verify(mapper).map(any(User.class), eq(UserEntity.class));
+        verify(mapper).map(any(UserEntity.class), eq(User.class));
     }
 
     @Test
@@ -84,4 +87,34 @@ class MyReactiveRepositoryAdapterTest {
         StepVerifier.create(result)
                 .expectNext(testUser)
                 .verifyComplete();
-    }}
+    }
+
+    @Test
+    @DisplayName("Debería no encontrar un usuario por número de identidad y retornar un Mono vacío")
+    void testFindUserByNumberIdentityNotFound() {
+        // Simular que el repositorio retorna un Mono vacío
+        when(repository.findByNumberIdentity(anyString())).thenReturn(Mono.empty());
+
+        Mono<User> result = adapter.findUserByNumberIdentity("99999");
+
+        // Verificar que el flujo se completa sin emitir ningún elemento
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Debería no encontrar un usuario por email y retornar un Mono vacío")
+    void testFindUserByEmailNotFound() {
+        // Simular que el repositorio retorna un Mono vacío
+        when(repository.findByEmail(anyString())).thenReturn(Mono.empty());
+
+        Mono<User> result = adapter.findUserByEmail("inexistente@correo.com");
+
+        // Verificar que el flujo se completa sin emitir ningún elemento
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+}

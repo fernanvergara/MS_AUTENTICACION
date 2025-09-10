@@ -1,6 +1,7 @@
 package co.com.sti.config;
 
 import co.com.sti.model.user.gateways.UserRepository;
+import co.com.sti.usecase.authentication.jwt.IJwtUtilsAuth;
 import co.com.sti.usecase.transaction.TransactionExecutor;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -48,6 +49,12 @@ public class UseCasesConfigTest {
         @Primary
         public TransactionExecutor transactionExecutor() {
             return mock(TransactionExecutor.class);
+        }
+
+        @Bean
+        @Primary
+        public IJwtUtilsAuth jwtUtilsAuth() {
+            return mock(IJwtUtilsAuth.class);
         }
     }
 

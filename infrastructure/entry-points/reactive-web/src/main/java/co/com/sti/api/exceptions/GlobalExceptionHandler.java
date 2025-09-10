@@ -46,6 +46,7 @@ public class GlobalExceptionHandler {
         return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse));
     }
 
+
     @ExceptionHandler(Exception.class)
     public Mono<ResponseEntity<Map<String, String>>> handleAllException(Exception ex) {
         Map<String, String> errorResponse = new HashMap<>();

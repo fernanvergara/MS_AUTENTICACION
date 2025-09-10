@@ -2,7 +2,6 @@ package co.com.sti.api.security;
 
 import co.com.sti.api.exceptions.ForbiddenException;
 import co.com.sti.api.exceptions.UnauthorizedException;
-import co.com.sti.api.security.domain.UserPrincipal;
 import co.com.sti.model.role.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -12,6 +11,9 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -25,7 +27,7 @@ public class JwtValidator {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    public Mono<UserPrincipal> validateToken(String token) {
+    public Mono<Authentication> validateToken(String token) {
         return Mono.fromCallable(() -> {
                     Claims claims = Jwts.parser()
                             .verifyWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret)))
@@ -44,12 +46,14 @@ public class JwtValidator {
                     }
 
                     // 3. Convertir el id de rol en una lista de autoridades
-                    List<String> roles = Collections.singletonList("ROLE_" + Role.getById(idRole).getName());
+                    List<SimpleGrantedAuthority> authorities = Collections.singletonList(
+                            new SimpleGrantedAuthority("ROLE_" + Role.getById(idRole).getName())
+                    );
 
-                    // Devolver un UserPrincipal para Spring Security
-                    return new UserPrincipal(email, roles);
+                    return new UsernamePasswordAuthenticationToken(email, token, authorities);
 
                 })
+                .cast(Authentication.class)
                 .onErrorResume(err -> { //revisar aqui
                     return switch (err) {
                         case ExpiredJwtException expiredJwtException ->

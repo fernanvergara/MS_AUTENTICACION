@@ -33,10 +33,10 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     @Override
     public Mono<User> findUserByNumberIdentity(String numberIdentity) {
         return repository.findByNumberIdentity(numberIdentity)
-                .doOnNext(u -> {
-                    if(u != null) {
+                .doOnSuccess(u -> {
+                    if (u != null) {
                         log.warn("Existe un usuario registrado con el Número de identificación dado, ID:'{}'", u.getId());
-                    }else{
+                    } else {
                         log.info("No existe usuario registrado con el Número de identificación: '{}'", numberIdentity);
                     }
                 })
@@ -46,10 +46,10 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     @Override
     public Mono<User> findUserByEmail(String email) {
         return repository.findByEmail(email)
-                .doOnNext(u -> {
-                    if(u != null) {
+                .doOnSuccess(u -> {
+                    if (u != null) {
                         log.warn("Existe un usuario registrado con el Email dado, ID:'{}'", u.getId());
-                    }else{
+                    } else {
                         log.info("No existe usuario registrado con el Email: '{}'", email);
                     }
                 })

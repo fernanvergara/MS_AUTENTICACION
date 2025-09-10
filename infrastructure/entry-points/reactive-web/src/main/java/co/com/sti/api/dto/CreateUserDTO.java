@@ -35,7 +35,7 @@ public record CreateUserDTO(
         String address,
 
         @NotNull(message = "El ID de rol no puede ser nulo")
-        Long idRole,
+        Integer idRole,
 
         @NotNull(message = "El salario no puede ser nulo")
         @DecimalMin(value = "0.0", message = "El salario debe ser mayor o igual a cero")

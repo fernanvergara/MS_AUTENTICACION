@@ -22,6 +22,7 @@ import org.springframework.security.web.server.context.WebSessionServerSecurityC
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
@@ -93,28 +94,32 @@ public class SecurityConfig {
         return authentication -> {
             String token = authentication.getCredentials().toString();
             // Lógica para validar el token y devolver un Mono con la autenticación
-            return jwtValidator.validateToken(token)
-                    .map(user -> new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
+            return jwtValidator.validateToken(token);
         };
     }
 
     @Bean
     public ServerSecurityContextRepository securityContextRepository() {
-        return new WebSessionServerSecurityContextRepository() {
-            @Override
-            public Mono<SecurityContext> load(org.springframework.web.server.ServerWebExchange exchange) {
-                String token = exchange.getRequest().getHeaders().getFirst("Authorization");
-                if (token != null && token.startsWith("Bearer ")) {
-                    String authToken = token.substring(7);
-                    return authenticationManager()
-                            .authenticate(new UsernamePasswordAuthenticationToken(authToken, authToken))
-                            .map(org.springframework.security.core.context.SecurityContextImpl::new)
-                            .cast(SecurityContext.class)
-                            .onErrorResume(throwable -> Mono.empty());
-                }
-                return Mono.empty();
-            }
-        };
+        return new TokenSecurityContextRepository();
+    }
+
+    private static class TokenSecurityContextRepository implements ServerSecurityContextRepository {
+        @Override
+        public Mono<Void> save(ServerWebExchange exchange, SecurityContext context) {
+            return Mono.empty();
+        }
+
+        @Override
+        public Mono<SecurityContext> load(ServerWebExchange exchange) {
+            return Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst("Authorization"))
+                    .filter(authHeader -> authHeader.startsWith("Bearer "))
+                    .map(authHeader -> authHeader.substring(7))
+                    .flatMap(token -> {
+                        ReactiveAuthenticationManager manager = ReactiveAuthenticationManager.class.cast(exchange.getApplicationContext().getBean("authenticationManager"));
+                        return manager.authenticate(new UsernamePasswordAuthenticationToken(token, token))
+                                .map(auth -> new org.springframework.security.core.context.SecurityContextImpl(auth));
+                    });
+        }
     }
 
 }
