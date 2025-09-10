@@ -10,4 +10,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class TaskPath {
     private String tasks;
     private String tasksById;
+    private String taskAuth;
 }

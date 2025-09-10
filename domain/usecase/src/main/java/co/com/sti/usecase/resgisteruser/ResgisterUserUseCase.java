@@ -19,18 +19,20 @@ public class ResgisterUserUseCase implements IRegisterUserUseCase{
         this.transactionExecutor = transactionExecutor;
     }
 
-    public Mono<Void> registerUser(User user){
+    public Mono<User> registerUser(User user){
         return  transactionExecutor.executeInTransaction(() -> {
-            if (user.getSalary().compareTo(BigDecimal.ZERO) < 0 || user.getSalary().compareTo(new BigDecimal(15000000)) > 0) {
-                return Mono.error(new InvalidUserDataException("El salario no esta dentro del rango mayor que 0 y menor que 15'000.000 COP"));
-            }
-            return userRepository.findUserByNumberIdentity(user.getNumberIdentity())
-                .flatMap(existingUser -> Mono.error(new UserAlreadyExistsException("Ya existe un usuario con este número de identidad")))
-                .switchIfEmpty(Mono.defer(() ->
-                        userRepository.findUserByEmail(user.getEmail())
-                                .flatMap(existingUser -> Mono.error(new UserAlreadyExistsException("Ya existe un usuario con este email.")))
-                                .switchIfEmpty(Mono.defer(() -> userRepository.saveUser(user)))
-                ));
-        }).then();
+                if (user.getSalary().compareTo(BigDecimal.ZERO) < 0 || user.getSalary().compareTo(new BigDecimal(15000000)) > 0) {
+                    return Mono.error(new InvalidUserDataException("El salario no esta dentro del rango mayor que 0 y menor que 15'000.000 COP"));
+                }
+
+                return userRepository.findUserByNumberIdentity(user.getNumberIdentity())
+                    .flatMap(existingUser -> Mono.<User>error(new UserAlreadyExistsException("Ya existe un usuario con este número de identidad")))
+                    .switchIfEmpty(Mono.defer(() ->
+                            userRepository.findUserByEmail(user.getEmail())
+                                    .flatMap(existingUser -> Mono.<User>error(new UserAlreadyExistsException("Ya existe un usuario con este email.")))
+                                    .switchIfEmpty(Mono.defer(() -> userRepository.saveUser(user)))
+                    ));
+                }
+            );
     }
 }

@@ -65,7 +65,7 @@ class ResgisterUserUseCaseTest {
         when(userRepository.findUserByEmail(anyString())).thenReturn(Mono.empty());
         when(userRepository.saveUser(any(User.class))).thenReturn(Mono.empty());
 
-        Mono<Void> result = useCase.registerUser(testUser);
+        Mono<User> result = useCase.registerUser(testUser);
 
         StepVerifier.create(result)
                 .verifyComplete();
@@ -80,7 +80,7 @@ class ResgisterUserUseCaseTest {
     void testRegisterUser_identityNumberExists() {
         when(userRepository.findUserByNumberIdentity(anyString())).thenReturn(Mono.just(existingUser));
 
-        Mono<Void> result = useCase.registerUser(testUser);
+        Mono<User> result = useCase.registerUser(testUser);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable ->
@@ -100,7 +100,7 @@ class ResgisterUserUseCaseTest {
         when(userRepository.findUserByNumberIdentity(anyString())).thenReturn(Mono.empty());
         when(userRepository.findUserByEmail(anyString())).thenReturn(Mono.just(existingUser));
 
-        Mono<Void> result = useCase.registerUser(testUser);
+        Mono<User> result = useCase.registerUser(testUser);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable ->
@@ -124,7 +124,7 @@ class ResgisterUserUseCaseTest {
                 .salary(new BigDecimal("20000000"))
                 .build();
 
-        Mono<Void> result = useCase.registerUser(userWithHighSalary);
+        Mono<User> result = useCase.registerUser(userWithHighSalary);
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable ->
@@ -137,4 +137,29 @@ class ResgisterUserUseCaseTest {
         verify(userRepository, times(0)).findUserByEmail(userWithHighSalary.getEmail());
         verify(userRepository, never()).saveUser(any(User.class));
     }
+
+    @Test
+    @DisplayName("should throw InvalidUserDataException when user's salary is negative")
+    void testRegisterUser_salaryIsNegative() {
+        User userWithNegativeSalary = User.builder()
+                .name("Negative Salary User")
+                .numberIdentity("111111111")
+                .email("negative.salary@example.com")
+                .salary(new BigDecimal("-100"))
+                .build();
+
+        Mono<User> result = useCase.registerUser(userWithNegativeSalary);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof InvalidUserDataException &&
+                                throwable.getMessage().equals("El salario no esta dentro del rango mayor que 0 y menor que 15'000.000 COP")
+                )
+                .verify();
+
+        verify(userRepository, never()).findUserByNumberIdentity(anyString());
+        verify(userRepository, never()).findUserByEmail(anyString());
+        verify(userRepository, never()).saveUser(any(User.class));
+    }
+
 }

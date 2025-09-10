@@ -5,14 +5,17 @@ CREATE TABLE rol (
 );
 
 INSERT INTO rol (id, nombre, descripcion)
-VALUES (1, 'ADMIN', 'Administrador del sistema'),
-       (2, 'CLIENTE', 'Cliente estándar');
+VALUES (1, 'ADMIN', 'Tiene control total sobre el sistema.'),
+       (2, 'ASESOR', 'Puede gestionar clientes y solicitudes.'),
+       (3, 'CLIENTE', 'Puede realizar solicitudes y consultar su historial.');
+
 
 CREATE TABLE usuario (
     id BIGSERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     apellido VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL UNIQUE,
     documento_identidad VARCHAR(15) NOT NULL UNIQUE,
     fecha_nacimiento DATE NOT NULL,
     telefono VARCHAR(20),
