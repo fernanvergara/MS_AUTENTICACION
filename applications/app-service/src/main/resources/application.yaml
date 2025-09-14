@@ -2,20 +2,20 @@ server:
   port: 8080
 spring:
   application:
-    name: "CrediYa"
+    name: "autenticacion"
   devtools:
     add-properties: false
-  flyway:
-    url: "jdbc:postgresql://localhost:5432/crediya"
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    url: "jdbc:postgresql://db_auth:5432/autenticacion_db"
     user: "postgres"
     password: "Misional123@"
-    locations: "classpath:db/migration"
-    enabled: false
+    clear-checksums: true
 adapters:
   r2dbc:
-    host: "localhost"
+    host: "db_auth"
     port: 5432
-    database: "crediya_usuarios"
+    database: "autenticacion_db"
     schema: "public"
     username: "postgres"
     password: "Misional123@"
