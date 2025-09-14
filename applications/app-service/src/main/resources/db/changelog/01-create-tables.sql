@@ -19,7 +19,7 @@ CREATE TABLE usuario (
     documento_identidad VARCHAR(15) NOT NULL UNIQUE,
     fecha_nacimiento DATE NOT NULL,
     telefono VARCHAR(20),
-    direccion VARCHAR(255)
-    id_rol BIGINT,
+    direccion VARCHAR(255),
+    id_rol INTEGER,
     salario_base NUMERIC(10, 2)
 );

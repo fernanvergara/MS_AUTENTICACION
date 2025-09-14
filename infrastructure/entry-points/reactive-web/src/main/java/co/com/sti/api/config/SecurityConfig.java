@@ -65,8 +65,9 @@ public class SecurityConfig {
                 .securityContextRepository(securityContextRepository)
                 .authorizeExchange(authorize -> authorize
                         .pathMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**", "/swagger-ui.html", "/webjars/**", "api/doc/**").permitAll()
-                        .pathMatchers( "/api/v1/usuarios").hasAnyRole(Role.ADMIN.getName(), Role.ADVISOR.getName())
-                        .pathMatchers( "/api/v1/usuarios/**").hasAnyRole(Role.ADMIN.getName(), Role.ADVISOR.getName(), Role.CLIENT.getName())
+                        .pathMatchers("/api/v1/usuarios").hasAnyRole(Role.ADMIN.getName(), Role.ADVISOR.getName())
+                        .pathMatchers("/api/v1/usuarios/**").hasAnyRole(Role.ADMIN.getName(), Role.ADVISOR.getName(), Role.CLIENT.getName())
+//                        .pathMatchers("/api/v1/usuarios").permitAll()
                         .pathMatchers("/api/v1/login").permitAll()
                         .anyExchange().authenticated()
                 )
